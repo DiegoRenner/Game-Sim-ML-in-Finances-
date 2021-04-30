@@ -6,7 +6,7 @@ def compute_trade(N, r, d, w, s, D):
     w_new = np.copy(w)
     s_new = np.copy(s)
     while(1):
-        U = cu.returns_ut(0,r,d,w_new,s_new)
+        U = cu.returns_ut(0,r,d,D,w_new,s_new)
         # select random agent
         i = int(np.floor(np.random.random(1) * N))
         # select agent with lowest utility

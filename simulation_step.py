@@ -10,7 +10,7 @@ def simulation_step(N, r, d, D, w, s):
     # compute dividends return
     w_new += cd.comp_div(d, D, s)
     # compute utility funcition
-    U = cu.returns_ut(0,r,d,w,s)
+    U = cu.returns_ut(0,r,d,D,w,s)
     # execute trding
     w_new, s_new = ct.compute_trade(N,r,d,w_new,s,D)
     return w_new, s_new
