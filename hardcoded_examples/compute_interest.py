@@ -1,4 +1,3 @@
-
 # takes interest rate and current wealth
 # returns wealth at next time step
 def comp_int(r, wealth):
