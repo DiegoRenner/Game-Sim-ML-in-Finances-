@@ -20,4 +20,4 @@ for i in range(0, n_t - 1):
     print("--------------------------------------------------------------")
     print("Wealth at step " + str(i) + ": " + str(w[i, :]))
     print("Stocks at step " + str(i) + ": " + str(s[i, :]))
-    w[i + 1, :], s[i + 1, :] = ss.simulation_step(N, r, d, D, w[i, :], s[i, :])
+    w[i + 1, :], s[i + 1, :] = ss.simulation_step_tf(N, r, d, D, w[i, :], s[i, :])
