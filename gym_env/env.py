@@ -3,11 +3,6 @@ import gym
 from sortedcontainers import SortedList
 
 
-class Agent:
-    def __init__(self, agent_id):
-        self.agent_id = agent_id
-
-
 class MarketEnv(gym.Env):
 
     class Order:

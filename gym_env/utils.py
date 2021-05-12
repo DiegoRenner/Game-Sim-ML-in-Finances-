@@ -1,18 +1,6 @@
-from env import Agent, MarketEnv
+from env import MarketEnv
 import numpy as np
 import pandas as pd
-
-
-class ExpUtilityAgent(Agent):
-    def __init__(self, agent_id, risk_aversion):
-        super(ExpUtilityAgent, self).__init__(agent_id)
-        self.risk_aversion = risk_aversion
-
-    def act(self, consumption):
-        if self.risk_aversion == 0:
-            return consumption
-        else:
-            return (1 - np.exp(-self.risk_aversion * consumption)) / self.risk_aversion
 
 
 def create_constant_series(interest_rate, dividend, steps):
@@ -30,7 +18,8 @@ def run(runs, params):
         env = MarketEnv(*params)
         for step in np.arange(env.end_time):
             total_returns = env.get_returns()
-            actions = [agent.act(c) for agent, c in zip(env.agents, total_returns)]
+            actions = [agent.act([c]) for agent, c in zip(env.agents, total_returns)]
+            print(f'ACTIONS: {actions}')
             state, done, rewards, info = env.step(actions)
         trade_hist.append(env.trade_history)
         final_states.append(state)
