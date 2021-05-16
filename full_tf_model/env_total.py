@@ -12,12 +12,12 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 class Game(keras.Model):
 
-    def __init__(self, end_time, fc1_dims=128):
+    def __init__(self, end_time, num_agents, fc1_dims=128):
         super(Game, self).__init__()
 
         self.time = 0
         self.end_time = end_time
-        self.agent_num = 2
+        self.agent_num = num_agents
         self.fc1_dims = fc1_dims
         self.out_dims = 1
 
@@ -29,12 +29,18 @@ class Game(keras.Model):
         self.returns = tf.keras.layers.Lambda(self.get_returns)
 
         # NN corresponding to first agent
-        self.nn1_fc1 = Dense(self.fc1_dims, activation='relu')
-        self.nn1_out = Dense(self.out_dims)
+        self.first_layers = [Dense(self.fc1_dims, activation='relu')]*self.agent_num
+        for i in np.arange(self.agent_num):
+            self.first_layers[i] = Dense(self.fc1_dims, activation='relu')
+        self.out_layers = [Dense(self.out_dims)]*self.agent_num
+        for i in np.arange(self.agent_num):
+            self.out_layers[i] = Dense(self.out_dims)
+        #self.nn1_fc1 = Dense(self.fc1_dims, activation='relu')
+        #self.nn1_out = Dense(self.out_dims)
 
-        # NN corresponding to second agent
-        self.nn2_fc1 = Dense(self.fc1_dims, activation='relu')
-        self.nn2_out = Dense(self.out_dims)
+        ## NN corresponding to second agent
+        #self.nn2_fc1 = Dense(self.fc1_dims, activation='relu')
+        #self.nn2_out = Dense(self.out_dims)
 
     def get_returns(self, input):
         """
@@ -111,13 +117,15 @@ class Game(keras.Model):
             returns = self.returns([self.data, self.book])
 
             # Forward pass of returns through the NN of each agent
-            _nn1 = self.nn1_fc1(tf.reshape(returns[0], shape=(1, 1)))
-            _nn2 = self.nn2_fc1(tf.reshape(returns[1], shape=(1, 1)))
+            _nn = [tf.zeros((self.fc1_dims,))]*self.agent_num
+            for i in np.arange(self.agent_num):
+                _nn[i] = self.first_layers[i](tf.reshape(returns[i], shape=(1, 1)))
 
-            p1.assign(tf.squeeze(self.nn1_out(_nn1)))
-            p2.assign(tf.squeeze(self.nn1_out(_nn2)))
+            p = [tf.Variable(tf.convert_to_tensor(1.0))]*self.agent_num
+            for i in np.arange(self.agent_num):
+                p[i].assign(tf.squeeze(self.out_layers[i](_nn[i])))
 
             # Trading
-            self.trade([p1, p2])
+            self.trade(p)
 
         return self.get_final_cash()  # Return final wealth as rewards
