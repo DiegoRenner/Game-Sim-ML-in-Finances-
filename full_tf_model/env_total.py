@@ -53,6 +53,12 @@ class Game(keras.Model):
         div_return = tf.math.scalar_mul(data[self.end_time + self.time], book[self.agent_num:])
         return tf.math.add(cash_return, div_return)
 
+    def _payout_returns(self, input):
+        data, book = input[0], input[1]
+        returns = self.get_returns(input)
+        book[:self.agent_num] = tf.math.add(book[:self.agent_num], returns)
+        return book
+
     def get_final_cash(self):
         r = self.data[self.end_time - 1].numpy()
         d = self.data[-1].numpy()
@@ -127,5 +133,7 @@ class Game(keras.Model):
 
             # Trading
             self.trade(p)
+
+            self.book.assign(self._payout_returns([self.data, self.book]))  # Payout returns
 
         return self.get_final_cash()  # Return final wealth as rewards
