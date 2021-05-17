@@ -35,12 +35,6 @@ class Game(keras.Model):
         self.out_layers = [Dense(self.out_dims)]*self.agent_num
         for i in np.arange(self.agent_num):
             self.out_layers[i] = Dense(self.out_dims)
-        #self.nn1_fc1 = Dense(self.fc1_dims, activation='relu')
-        #self.nn1_out = Dense(self.out_dims)
-
-        ## NN corresponding to second agent
-        #self.nn2_fc1 = Dense(self.fc1_dims, activation='relu')
-        #self.nn2_out = Dense(self.out_dims)
 
     def get_returns(self, input):
         """
@@ -53,11 +47,10 @@ class Game(keras.Model):
         div_return = tf.math.scalar_mul(data[self.end_time + self.time], book[self.agent_num:])
         return tf.math.add(cash_return, div_return)
 
-    def _payout_returns(self, input):
-        data, book = input[0], input[1]
-        returns = self.get_returns(input)
-        book[:self.agent_num] = tf.math.add(book[:self.agent_num], returns)
-        return book
+    def _payout_returns(self):
+        returns = self.get_returns([self.data, self.book])
+        stocks = self.book[self.agent_num:]
+        self.book.assign(tf.concat([tf.math.add(self.book[:self.agent_num], returns), stocks], axis=0))
 
     def get_final_cash(self):
         r = self.data[self.end_time - 1].numpy()
@@ -112,14 +105,8 @@ class Game(keras.Model):
         self.data.assign(x[:2*self.end_time])
         self.book.assign(x[2*self.end_time:])
 
-        # Initializing the tensors with indifference prices with dummy values
-        p1 = tf.Variable(tf.convert_to_tensor(1.0))
-        p2 = tf.Variable(tf.convert_to_tensor(1.0))
-
         for time in np.arange(self.end_time):
             self.time = time
-
-            # Calculate returns
             returns = self.returns([self.data, self.book])
 
             # Forward pass of returns through the NN of each agent
@@ -131,9 +118,7 @@ class Game(keras.Model):
             for i in np.arange(self.agent_num):
                 p[i].assign(tf.squeeze(self.out_layers[i](_nn[i])))
 
-            # Trading
             self.trade(p)
-
-            self.book.assign(self._payout_returns([self.data, self.book]))  # Payout returns
+            self._payout_returns()
 
         return self.get_final_cash()  # Return final wealth as rewards
