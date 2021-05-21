@@ -6,7 +6,7 @@ from utils import create_constant_series, create_input_tensor
 STEPS = 11
 CONSTANT_INTERESTS = [0.01, 0.02, 0.05]
 CONSTANT_DIVIDENDS = [0.5, 1, 1.5]
-AGENT_NUM = 5
+AGENT_NUM = 1
 CASH_ENDOWMENTS = [20, 100, 80]
 STOCK_ENDOWMENTS = [10, 15, 10]
 
@@ -19,7 +19,7 @@ stock_endowment = [STOCK_ENDOWMENTS[0]]*AGENT_NUM
 x = create_input_tensor(interest_data, dividend_data, cash_endowment, stock_endowment)
 game(x)  # try forward call
 
-print(len(game.trainable_weights))  # note: trainable weights attribute not meaningful
+print(game.trainable_weights)  # note: trainable weights attribute not meaningful
 
 
 def training():  # TODO
