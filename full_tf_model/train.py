@@ -59,7 +59,7 @@ def objective_fn(w1, b1, w2, b2):
 
         cumulative_rewards = tf.concat([cumulative_rewards, cumulative_reward], axis=0)
 
-    return cumulative_rewards
+    return -cumulative_rewards  # minimize total negative rewards
 
 
 training_agent = 0  # Agent to be trained
