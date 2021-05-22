@@ -44,6 +44,15 @@ class Game(keras.Model):
         div_return = tf.math.scalar_mul(data[self.end_time + self.time], book[self.agent_num:])
         return tf.math.add(cash_return, div_return)
 
+    def get_prices(self, returns):
+        intermediate_outputs = [tf.Variable(tf.zeros(self.fc1_dims)) for i in np.arange(self.agent_num)]
+        prices = [tf.Variable(tf.zeros(1)) for i in np.arange(self.agent_num)]
+        for i in np.arange(self.agent_num):
+            intermediate_outputs[i].assign(tf.squeeze(self.first_layers[i](tf.reshape(returns[i], shape=(1, 1)))))
+            prices[i].assign(tf.reshape(self.out_layers[i](tf.reshape(intermediate_outputs[i],
+                                                                      shape=(1, self.fc1_dims))), shape=(1,)))
+        return prices
+
     def _payout_returns(self):
         returns = self.get_returns([self.data, self.book])
         stocks = self.book[self.agent_num:]
@@ -64,7 +73,9 @@ class Game(keras.Model):
 
         self.book.assign(tf.convert_to_tensor(_book))
 
-    def trade(self, prices):
+    def trade(self):
+        returns = self.returns([self.data, self.book])
+        prices = self.get_prices(returns)
         """Trading as described in Algorithm 1"""
         orders = SortedList(key=lambda x: x.price)
 
@@ -89,6 +100,15 @@ class Game(keras.Model):
                 self._execute_trade(_trade)
                 trades.append(_trade)
 
+            # Comment the following lines to prevent recomputation of utilities during trading.
+            returns = self.returns([self.data, self.book])
+            prices = self.get_prices(returns)
+            orders_temp = SortedList(key=lambda x: x.price)
+
+            for i in np.arange(len(orders)):
+                orders_temp.add(Order(agent_id=orders[i], price=prices[order[i]]))
+            orders = orders_temp
+
     def call(self, x):
         """
         Call function of the model
@@ -102,15 +122,8 @@ class Game(keras.Model):
 
         for time in np.arange(self.end_time):
             self.time = time
-            returns = self.returns([self.data, self.book])
-
-            # Forward pass of returns through the NN of each agent - ReLU to ensure non-negative prices
-            for i in np.arange(self.agent_num):
-                self.intermediate_outputs[i].assign(tf.squeeze(self.first_layers[i](tf.reshape(returns[i], shape=(1, 1)))))
-                self.prices[i].assign(tf.reshape(self.out_layers[i](tf.reshape(tf.nn.relu(self.intermediate_outputs[i]),
-                                                                               shape=(1, self.fc1_dims))), shape=(1,)))
-
-            self.trade(self.prices)
+            self.trade()
             self._payout_returns()
 
         return self.get_final_cash()  # Return final wealth as rewards
+

@@ -96,13 +96,9 @@ class Game(keras.Model):
                 self._execute_trade(_trade)
                 trades.append(_trade)
 
-                if self.book[self.agent_num + ask.agent_id] == 0:
-                    orders.remove(ask)
-
             # Comment the following lines to prevent recomputation of utilities during trading.
             returns = self.returns([self.data, self.book])
             prices = self.get_prices(returns)
-            """Trading as described in Algorithm 1"""
             orders_temp = SortedList(key=lambda x: x.price)
 
             for i in orders:
