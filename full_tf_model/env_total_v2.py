@@ -29,10 +29,6 @@ class Game(keras.Model):
         self.first_layers = [Dense(self.fc1_dims, activation='relu') for i in np.arange(self.agent_num)]
         self.out_layers = [Dense(self.out_dims) for i in np.arange(self.agent_num)]
 
-        # Initialize remaining tensors needed in call function
-        self.intermediate_outputs = [tf.Variable(tf.zeros(self.fc1_dims)) for i in np.arange(self.agent_num)]
-        self.prices = [tf.Variable(tf.zeros(1)) for i in np.arange(self.agent_num)]
-
     def get_returns(self, input):
         """
         Calculates current (wrt. time) returns of the agents
