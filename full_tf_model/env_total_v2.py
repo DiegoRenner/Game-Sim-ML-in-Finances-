@@ -106,7 +106,7 @@ class Game(keras.Model):
             orders_temp = SortedList(key=lambda x: x.price)
 
             for i in np.arange(len(orders)):
-                orders_temp.add(Order(agent_id=orders[i], price=prices[order[i]]))
+                orders_temp.add(Order(agent_id=orders[i], price=prices[orders[i]]))
             orders = orders_temp
 
     def call(self, x):
