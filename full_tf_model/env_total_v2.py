@@ -104,14 +104,13 @@ class Game(keras.Model):
             self.time = time
             returns = self.returns([self.data, self.book])
 
-            # Forward pass of returns through the NN of each agent
+            # Forward pass of returns through the NN of each agent - ReLU to ensure non-negative prices
             for i in np.arange(self.agent_num):
                 self.intermediate_outputs[i].assign(tf.squeeze(self.first_layers[i](tf.reshape(returns[i], shape=(1, 1)))))
-                self.prices[i].assign(tf.reshape(self.out_layers[i](tf.reshape(self.intermediate_outputs[i],
-                    shape=(1, self.fc1_dims))), shape=(1,)))
+                self.prices[i].assign(tf.reshape(self.out_layers[i](tf.reshape(tf.nn.relu(self.intermediate_outputs[i]),
+                                                                               shape=(1, self.fc1_dims))), shape=(1,)))
 
             self.trade(self.prices)
             self._payout_returns()
 
         return self.get_final_cash()  # Return final wealth as rewards
-

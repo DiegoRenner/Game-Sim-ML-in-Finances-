@@ -18,7 +18,7 @@ AGENT_NUM = 2
 ENDOW_CASH_POOL = [20, 100, 80]
 ENDOW_STOCK_POOL = [10, 15, 10]
 POPULATION_SIZE = 50  # number of different weight specifications the opt. algorithm compares
-MAX_ITERATIONS = 2  # number of iterations that the optimization algorithm runs
+MAX_ITERATIONS = 50  # number of iterations that the optimization algorithm runs
 save_model = False
 
 # Batch of game scenarios
@@ -42,7 +42,6 @@ def objective_fn(w1, b1, w2, b2):
     each input is tensor where the first dimension indexes the elements in the population.
     each population element contains weights / biases of layers of agent's NN
     """
-
     global iterations
     print(f'Training iteration {iterations}')
     iterations += 1
@@ -64,6 +63,7 @@ def objective_fn(w1, b1, w2, b2):
 
 
 training_agent = 0  # Agent to be trained
+
 
 # Initial weights of layers that are trained
 initial_position = [tf.convert_to_tensor(np.array(np.random.normal(0, 1, size=(1, 128)))),
