@@ -47,7 +47,7 @@ class Game(keras.Model):
             intermediate_outputs[i].assign(tf.squeeze(self.first_layers[i](tf.reshape(returns[i], shape=(1, 1)))))
             prices[i].assign(tf.reshape(self.out_layers[i](tf.reshape(intermediate_outputs[i],
                                                                       shape=(1, self.fc1_dims))), shape=(1,)))
-        return prices
+        return tf.nn.relu(prices)  # ensure non-negative prices
 
     def _payout_returns(self):
         returns = self.get_returns([self.data, self.book])
