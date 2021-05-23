@@ -8,7 +8,8 @@ from utils import create_input_batch
 
 
 # Hyperparameters
-EPOCHS = 5
+EPOCHS_SINGLE = 5
+EPOCHS_TOTAL = 5
 STEPS = 11
 IRM_POOL = [0.01, 0.02, 0.05]
 IRS_POOL = [0.0]
@@ -17,12 +18,12 @@ DIVS_POOL = [0.2, 0.3, 0.4]
 AGENT_NUM = 2
 ENDOW_CASH_POOL = [20, 100, 80]
 ENDOW_STOCK_POOL = [10, 15, 10]
-POPULATION_SIZE = 50  # number of different weight specifications the opt. algorithm compares
-MAX_ITERATIONS = 50  # number of iterations that the optimization algorithm runs
+POPULATION_SIZE = 10  # number of different weight specifications the opt. algorithm compares
+MAX_ITERATIONS = 0  # number of iterations that the optimization algorithm runs
 save_model = False
 
 # Batch of game scenarios
-batch = create_input_batch(batch_size=EPOCHS, agent_num=AGENT_NUM, steps=STEPS,
+batch = create_input_batch(batch_size=EPOCHS_SINGLE, agent_num=AGENT_NUM, steps=STEPS,
                            irm_pool=IRM_POOL, divm_pool=DIVM_POOL, irs_pool=IRS_POOL, divs_pool=DIVS_POOL,
                            endow_cash_pool=ENDOW_CASH_POOL, endow_stock_pool=ENDOW_STOCK_POOL)
 
@@ -35,7 +36,7 @@ print(game.summary())
 
 iterations = 0
 
-# Training
+# function to be optimized by differential evolution minimizer
 def objective_fn(w1, b1, w2, b2):
     """
     Wrapper function around game for training a specific agent. Input to the optimization algorithm.
@@ -61,19 +62,36 @@ def objective_fn(w1, b1, w2, b2):
 
     return -cumulative_rewards  # minimize total negative rewards
 
+# Train all agents
+print("---------------------------------------")
+print("Training output:")
+for k in np.arange(EPOCHS_TOTAL*AGENT_NUM):
+    iterations = 0 # Reset iterations
+    training_agent = k%AGENT_NUM  # Agent to be trained
+    if k%AGENT_NUM == 0:
+        print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+        print("EPOCHS_TOTAL: " + str(int(k/AGENT_NUM)))
+        print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+    print("####################### Training agent: " + str(training_agent) + " ######################")
+    # Initial weights of layers that are trained
+    init_weights_first_layer = game.first_layers[training_agent].get_weights()
+    init_weights_out_layer = game.out_layers[training_agent].get_weights()
+    initial_position = [init_weights_first_layer[0],
+                        init_weights_first_layer[1],
+                        init_weights_out_layer[0],
+                        init_weights_out_layer[1]]
+    # Train one agent
+    optim_results = tfp.optimizer.differential_evolution_minimize(objective_fn, initial_position=initial_position,
+                                                            population_size=POPULATION_SIZE, max_iterations=MAX_ITERATIONS, seed=0)
+    # set weights of trained agent to best known
+    game.first_layers[training_agent].set_weights([optim_results.position[0], optim_results.position[1]])
+    game.out_layers[training_agent].set_weights([optim_results.position[2], optim_results.position[3]])
 
-training_agent = 0  # Agent to be trained
-
-
-# Initial weights of layers that are trained
-initial_position = [tf.convert_to_tensor(np.array(np.random.normal(0, 1, size=(1, 128)))),
-                    tf.convert_to_tensor(np.zeros(128)),
-                    tf.convert_to_tensor(np.array(np.random.normal(0, 1, size=(128, 1)))),
-                    tf.convert_to_tensor(np.zeros(1))]
-
-optim_results = tfp.optimizer.differential_evolution_minimize(objective_fn, initial_position=initial_position,
-                                                              max_iterations=MAX_ITERATIONS, seed=0)
-print(optim_results.converged)
+    # Output rewards of all agents given a sample input, for monitoring purposes
+    print("Rewards for sample input:")
+    output = game(x)
+    for i in np.arange(AGENT_NUM):
+        print("Agent " + str(i) +": " + str(output[i]))
 
 # if save_model:
 #   filename = 'weights_'
