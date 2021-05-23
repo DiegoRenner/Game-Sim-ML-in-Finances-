@@ -65,7 +65,7 @@ class Game(keras.Model):
         _book[trade.agent_buy] -= trade.price
         _book[trade.agent_sell] += trade.price
         _book[self.agent_num + trade.agent_buy] += trade.quantity
-        _book[self.agent_num + trade.agent_sell] += trade.quantity
+        _book[self.agent_num + trade.agent_sell] -= trade.quantity
 
         self.book.assign(tf.convert_to_tensor(_book))
 
