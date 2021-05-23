@@ -24,8 +24,8 @@ def create_constant_series(interest_rate, dividend, steps):
 
 
 def create_random_series(ir_mean, div_mean, steps, ir_sigma=0, div_sigma=0):
-    interest_data = np.random.lognormal(ir_mean, ir_sigma, steps).tolist()
-    dividend_data = np.random.lognormal(div_mean, div_sigma, steps).tolist()
+    interest_data = np.random.normal(ir_mean, ir_sigma, steps).tolist()
+    dividend_data = np.random.normal(div_mean, div_sigma, steps).tolist()
     return interest_data, dividend_data
 
 
