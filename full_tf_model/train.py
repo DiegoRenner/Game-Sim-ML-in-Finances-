@@ -1,10 +1,10 @@
 import numpy as np
-import datetime
+from datetime import datetime
 from tqdm import trange
 import tensorflow as tf
 import tensorflow_probability as tfp
 from env_total_v2 import Game
-from utils import create_input_batch
+from utils import create_input_batch, save_weights, load_weights
 
 
 # Hyperparameters
@@ -18,9 +18,9 @@ DIVS_POOL = [0.2, 0.3, 0.4]
 AGENT_NUM = 2
 ENDOW_CASH_POOL = [20, 100, 80]
 ENDOW_STOCK_POOL = [10, 15, 10]
-POPULATION_SIZE = 10  # number of different weight specifications the opt. algorithm compares
+POPULATION_SIZE = 10  # number of different weight specifications compared
 MAX_ITERATIONS = 0  # number of iterations that the optimization algorithm runs
-save_model = False
+save = False
 
 # Batch of game scenarios
 batch = create_input_batch(batch_size=EPOCHS_SINGLE, agent_num=AGENT_NUM, steps=STEPS,
@@ -31,7 +31,7 @@ game = Game(STEPS, AGENT_NUM)
 
 # Summary and dummy pass to ensure initialization
 x = batch[0]
-_ = game(x)  
+_ = game(x)
 print(game.summary())
 
 iterations = 0
@@ -54,7 +54,7 @@ def objective_fn(w1, b1, w2, b2):
         game.out_layers[training_agent].set_weights([w2[i], b2[i]])
 
         cumulative_reward = tf.Variable(tf.zeros(1))
-        for epoch, game_inputs in enumerate(batch): 
+        for epoch, game_inputs in enumerate(batch):
             _reward = game(game_inputs)[training_agent]
             cumulative_reward.assign_add(tf.expand_dims(_reward, axis=0))
 
@@ -62,13 +62,14 @@ def objective_fn(w1, b1, w2, b2):
 
     return -cumulative_rewards  # minimize total negative rewards
 
+
 # Train all agents
 print("---------------------------------------")
 print("Training output:")
 for k in np.arange(EPOCHS_TOTAL*AGENT_NUM):
-    iterations = 0 # Reset iterations
+    iterations = 0  # Reset iterations
     training_agent = k%AGENT_NUM  # Agent to be trained
-    if k%AGENT_NUM == 0:
+    if training_agent == 0:
         print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
         print("EPOCHS_TOTAL: " + str(int(k/AGENT_NUM)))
         print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
@@ -81,8 +82,10 @@ for k in np.arange(EPOCHS_TOTAL*AGENT_NUM):
                         init_weights_out_layer[0],
                         init_weights_out_layer[1]]
     # Train one agent
-    optim_results = tfp.optimizer.differential_evolution_minimize(objective_fn, initial_position=initial_position,
-                                                            population_size=POPULATION_SIZE, max_iterations=MAX_ITERATIONS, seed=0)
+    optim_results = tfp.optimizer.differential_evolution_minimize(objective_fn, 
+        initial_position=initial_position, population_size=POPULATION_SIZE, 
+        max_iterations=MAX_ITERATIONS, seed=0)
+
     # set weights of trained agent to best known
     game.first_layers[training_agent].set_weights([optim_results.position[0], optim_results.position[1]])
     game.out_layers[training_agent].set_weights([optim_results.position[2], optim_results.position[3]])
@@ -93,9 +96,7 @@ for k in np.arange(EPOCHS_TOTAL*AGENT_NUM):
     for i in np.arange(AGENT_NUM):
         print("Agent " + str(i) +": " + str(output[i]))
 
-# if save_model:
-#   filename = 'weights_'
-#   checkpoint_path = 'saved_model_weights/'
-#   cp_callback = tf.keras.callbacks.ModelCheckpoint(filepath=checkpoint_path,
-#           save_weights_only=True, verbose=1)
-    
+if save:
+    save_weights(game,
+                 f'saved_model_weights/weights_{now.strftime("%m%d%Y_%H%M%S")}.txt')
+

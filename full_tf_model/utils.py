@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import tensorflow as tf
+import pickle
 
 
 class Order:
@@ -53,3 +54,23 @@ def create_input_batch(batch_size: int, agent_num: int, steps: int, irm_pool: li
 
 def create_input_tensor(interest_data, dividend_data, endowments_cash, endowments_stock):
     return tf.convert_to_tensor(interest_data + dividend_data + endowments_cash + endowments_stock)
+
+
+def save_weights(game, filename):
+    weights = []
+    for i in np.arange(game.agent_num):
+        first_layer_w, first_layer_b = game.first_layers[i].get_weights()
+        out_layer_w, out_layer_b = game.out_layers[i].get_weights()
+        weights.append([i, [first_layer_w, first_layer_b],
+                        [out_layer_w, out_layer_b]])
+    with open(filename, 'wb') as f:
+        pickle.dump(weights, f)
+
+
+def load_weights(game, filename):
+    with open(filename, "rb") as f:
+        weights = pickle.load(f)
+    for i in np.arange(game.agent_num):
+        game.first_layers[i].set_weights(weights[i][1])
+        game.out_layers[i].set_weights(weights[i][2])
+
