@@ -98,5 +98,5 @@ for k in np.arange(EPOCHS_TOTAL*AGENT_NUM):
 
 if save:
     save_weights(game,
-                 f'saved_model_weights/weights_{now.strftime("%m%d%Y_%H%M%S")}.txt')
+                 f'saved_model_weights/weights_{datetime.now.strftime("%m%d%Y_%H%M%S")}.txt')
 
