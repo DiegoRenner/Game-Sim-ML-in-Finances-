@@ -57,6 +57,7 @@ def train(
     print("---------------------------------------")
     print("Training output:")
     for k in np.arange(epochs_total * game.agent_num):
+        game.train = True
         iterations = 0  # Reset iterations
         training_agent = k % game.agent_num  # Agent to be trained
         if training_agent == 0:
@@ -97,16 +98,29 @@ def train(
         )
 
         # Evaluation
+        game.train = False
+        trade_nums = []
+        avg_prices = []
         for i, scenario in enumerate(batch):
             if i == 0:
                 _rewards = game(scenario)
+                trade_nums.append(game.trade_num)
+                avg_prices.append(np.nanmean(game.trade_prices))
             else:
                 _rewards += game(scenario)
+                trade_nums.append(game.trade_num)
+                avg_prices.append(np.nanmean(game.trade_prices))
+
         _rewards = _rewards / len(batch)
+        avg_trade_num = np.nanmean(trade_nums)
+        avg_avg_price = np.nan_to_num(np.nanmean(avg_prices))
 
         for agent in np.arange(game.agent_num):
             with writer.as_default():
                 tf.summary.scalar(f"Average reward {agent}", _rewards[agent], step=k)
+        with writer.as_default():
+            tf.summary.scalar("Average number of trades", avg_trade_num, step=k)
+            tf.summary.scalar("Average price in trades", avg_avg_price, step=k)
 
     with writer.as_default():
         hp.hparams(log_params)

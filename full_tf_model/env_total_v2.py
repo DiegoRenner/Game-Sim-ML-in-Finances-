@@ -8,7 +8,6 @@ from utils import Order, Trade
 
 
 class Game(keras.Model):
-
     def __init__(self, end_time, agent_num, fc1_dims=128):
         super(Game, self).__init__()
 
@@ -17,6 +16,7 @@ class Game(keras.Model):
         self.agent_num = agent_num
         self.fc1_dims = fc1_dims
         self.out_dims = 1
+        self.train = True
 
         # Tensors that unpack the input
         self.data = tf.Variable(tf.zeros(2 * self.end_time), trainable=False)
@@ -26,7 +26,9 @@ class Game(keras.Model):
         self.returns = tf.keras.layers.Lambda(self.get_returns)
 
         # Initializing the layers corresponding to different agents
-        self.first_layers = [Dense(self.fc1_dims, activation='relu') for i in np.arange(self.agent_num)]
+        self.first_layers = [
+            Dense(self.fc1_dims, activation="relu") for i in np.arange(self.agent_num)
+        ]
         self.out_layers = [Dense(self.out_dims) for i in np.arange(self.agent_num)]
 
     def get_returns(self, input):
@@ -36,29 +38,47 @@ class Game(keras.Model):
         @return: tensor containing the returns
         """
         data, book = input[0], input[1]
-        cash_return = tf.math.scalar_mul(data[self.time], book[:self.agent_num])
-        div_return = tf.math.scalar_mul(data[self.end_time + self.time], book[self.agent_num:])
+        cash_return = tf.math.scalar_mul(data[self.time], book[: self.agent_num])
+        div_return = tf.math.scalar_mul(
+            data[self.end_time + self.time], book[self.agent_num :]
+        )
         return tf.math.add(cash_return, div_return)
 
     def get_prices(self, returns):
-        intermediate_outputs = [tf.Variable(tf.zeros(self.fc1_dims)) for i in np.arange(self.agent_num)]
+        intermediate_outputs = [
+            tf.Variable(tf.zeros(self.fc1_dims)) for i in np.arange(self.agent_num)
+        ]
         prices = [tf.Variable(tf.zeros(1)) for i in np.arange(self.agent_num)]
         for i in np.arange(self.agent_num):
-            intermediate_outputs[i].assign(tf.squeeze(self.first_layers[i](tf.reshape(returns[i], shape=(1, 1)))))
-            prices[i].assign(tf.reshape(self.out_layers[i](tf.reshape(intermediate_outputs[i],
-                                                                      shape=(1, self.fc1_dims))), shape=(1,)))
+            intermediate_outputs[i].assign(
+                tf.squeeze(self.first_layers[i](tf.reshape(returns[i], shape=(1, 1))))
+            )
+            prices[i].assign(
+                tf.reshape(
+                    self.out_layers[i](
+                        tf.reshape(intermediate_outputs[i], shape=(1, self.fc1_dims))
+                    ),
+                    shape=(1,),
+                )
+            )
         return tf.nn.relu(prices)  # ensure non-negative prices
 
     def _payout_returns(self):
         returns = self.get_returns([self.data, self.book])
-        stocks = self.book[self.agent_num:]
-        self.book.assign(tf.concat([tf.math.add(self.book[:self.agent_num], returns), stocks], axis=0))
+        stocks = self.book[self.agent_num :]
+        self.book.assign(
+            tf.concat(
+                [tf.math.add(self.book[: self.agent_num], returns), stocks], axis=0
+            )
+        )
 
     def get_final_cash(self):
         r = self.data[self.end_time - 1].numpy()
         d = self.data[-1].numpy()
         rate = np.multiply(d, np.divide(1 + r, r))
-        return self.book[:self.agent_num] + tf.math.scalar_mul(rate, self.book[self.agent_num:2 * self.agent_num])
+        return self.book[: self.agent_num] + tf.math.scalar_mul(
+            rate, self.book[self.agent_num : 2 * self.agent_num]
+        )
 
     def _execute_trade(self, trade):
         _book = self.book.numpy()
@@ -102,8 +122,15 @@ class Game(keras.Model):
             orders_temp = SortedList(key=lambda x: x.price)
 
             for i in np.arange(len(orders)):
-                orders_temp.add(Order(agent_id=orders[i].agent_id, price=prices[orders[i].agent_id]))
+                orders_temp.add(
+                    Order(agent_id=orders[i].agent_id, price=prices[orders[i].agent_id])
+                )
             orders = orders_temp
+
+        if not self.train:
+            self.trade_num += len(trades)
+            for trade in trades:
+                self.trade_prices.append(trade.price.numpy()[0])
 
     def call(self, x):
         """
@@ -112,9 +139,13 @@ class Game(keras.Model):
         @return: rewards of each agent
         """
 
+        if not self.train:
+            self.trade_num = 0
+            self.trade_prices = []
+
         # Unpacking the input tensor
-        self.data.assign(x[:2*self.end_time])
-        self.book.assign(x[2*self.end_time:])
+        self.data.assign(x[: 2 * self.end_time])
+        self.book.assign(x[2 * self.end_time :])
 
         for time in np.arange(self.end_time):
             self.time = time
@@ -122,4 +153,3 @@ class Game(keras.Model):
             self._payout_returns()
 
         return self.get_final_cash()  # Return final wealth as rewards
-
