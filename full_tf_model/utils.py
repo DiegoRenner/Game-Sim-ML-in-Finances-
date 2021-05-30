@@ -30,7 +30,7 @@ def create_random_series(ir_mean, div_mean, steps, ir_sigma=0, div_sigma=0):
     return interest_data, dividend_data
 
 
-def create_input_batch(batch_size: int, agent_num: int, steps: int, irm_pool: list, divm_pool: list,
+def create_input_batch(agent_num: int, steps: int, batch_size: int, irm_pool: list, divm_pool: list,
                        irs_pool: list, divs_pool: list, endow_cash_pool: list, endow_stock_pool: list):
     """Creates @batch_size number of tensors that represent an input to a single game."""
 
