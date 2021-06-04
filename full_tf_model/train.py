@@ -27,10 +27,10 @@ def train(
         Each population element contains weights / biases of layers of agent's NN
         """
         global iterations
-        print(f"Training iteration {iterations}")
         iterations += 1
 
-        for i in trange(len(w1), unit="population_element"):
+        for i in (t:= trange(len(w1), unit="population_element")):
+            t.set_description(f"iteration {iterations}")
 
             game.first_layers[training_agent].set_weights([w1[i], b1[i]])
             game.out_layers[training_agent].set_weights([w2[i], b2[i]])
