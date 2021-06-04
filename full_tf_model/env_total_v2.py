@@ -21,6 +21,7 @@ class Game(keras.Model):
         # Tensors that unpack the input
         self.data = tf.Variable(tf.zeros(2 * self.end_time), trainable=False)
         self.book = tf.Variable(tf.zeros(2 * self.agent_num), trainable=False)
+        self.horizon_price = tf.Variable(tf.zeros(1), trainable=False)
 
         # Layer that calculates the returns of each agent
         self.returns = tf.keras.layers.Lambda(self.get_returns)
@@ -73,11 +74,9 @@ class Game(keras.Model):
         )
 
     def get_final_cash(self):
-        r = self.data[self.end_time - 1].numpy()
-        d = self.data[-1].numpy()
-        rate = np.multiply(d, np.divide(1 + r, r))
         return self.book[: self.agent_num] + tf.math.scalar_mul(
-            rate, self.book[self.agent_num : 2 * self.agent_num]
+            tf.squeeze(self.horizon_price),
+            self.book[self.agent_num : 2 * self.agent_num],
         )
 
     def _execute_trade(self, trade):
@@ -145,7 +144,8 @@ class Game(keras.Model):
 
         # Unpacking the input tensor
         self.data.assign(x[: 2 * self.end_time])
-        self.book.assign(x[2 * self.end_time :])
+        self.book.assign(x[2 * self.end_time : -1])
+        self.horizon_price.assign(tf.expand_dims(x[-1], 0))
 
         for time in np.arange(self.end_time):
             self.time = time

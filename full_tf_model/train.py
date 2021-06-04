@@ -4,8 +4,7 @@ from tqdm import trange
 import tensorflow as tf
 import tensorflow_probability as tfp
 from tensorboard.plugins.hparams import api as hp
-from env_total_v2 import Game
-from utils import create_input_batch, save_weights, load_weights
+from utils import save_weights
 
 
 def train(

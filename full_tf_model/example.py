@@ -1,5 +1,5 @@
 from env_total_v2 import Game
-from utils import create_input_batch
+from utils import get_data, batch_from_data
 from train import train
 
 
@@ -19,19 +19,22 @@ training_params = {
 
 batch_params = {
     "batch_size": 5,  # number of epochs an agent is trained per training
-    "irm_pool": [0.01, 0.02, 0.05],
-    "irs_pool": [0.0],
-    "divm_pool": [0.5, 1, 1.5],
-    "divs_pool": [0.2, 0.3, 0.4],
-    "endow_cash_pool": [20, 100, 80],
-    "endow_stock_pool": [10, 15, 10],
+    "endow_cash": 500,
+    "endow_stock": 5,
+    "horizon": 20,
+    "init_price": 100,
+    "sigma": 0.2,
 }
 
-log_params = {**game_params, **training_params, "batch_size":
-              batch_params["batch_size"]}
+seeds = [23462, 192, 3817, 9732, 4]
+
+log_params = {**game_params, **training_params, **batch_params}
+int_data, dy_data = get_data()
 
 game = Game(**game_params)
-batch = create_input_batch(game.agent_num, game.end_time, **batch_params)
+batch = batch_from_data(
+    int_data, dy_data, game.agent_num, game.end_time, seeds, **batch_params
+)
 
 # Dummy pass to ensure initialization
 x = batch[0]
