@@ -28,8 +28,9 @@ def train(
         """
         global iterations
         iterations += 1
+        t = trange(len(w1), unit="population_element")
 
-        for i in (t:= trange(len(w1), unit="population_element")):
+        for i in t:
             t.set_description(f"iteration {iterations}")
 
             game.first_layers[training_agent].set_weights([w1[i], b1[i]])
