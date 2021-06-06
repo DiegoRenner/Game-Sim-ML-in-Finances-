@@ -17,6 +17,7 @@ class Game(keras.Model):
         self.fc1_dims = fc1_dims
         self.out_dims = 1
         self.train = True
+        self.logger = None
 
         # Tensors that unpack the input
         self.data = tf.Variable(tf.zeros(2 * self.end_time), trainable=False)
@@ -89,16 +90,18 @@ class Game(keras.Model):
         self.book.assign(tf.convert_to_tensor(_book))
 
     def trade(self):
+        """Trading as described in Algorithm 1"""
         returns = self.returns([self.data, self.book])
         prices = self.get_prices(returns)
-        """Trading as described in Algorithm 1"""
         orders = SortedList(key=lambda x: x.price)
 
         for i in np.arange(self.agent_num):
             orders.add(Order(agent_id=i, price=prices[i]))
 
-        trades = []
+        if not self.train:
+            self.logger["initial orders"].append(orders)
 
+        trades = []
         while len(orders) > 1:
             # Draw random agent's action
             idx_bid = np.random.randint(len(orders))
@@ -127,9 +130,7 @@ class Game(keras.Model):
             orders = orders_temp
 
         if not self.train:
-            self.trade_num += len(trades)
-            for trade in trades:
-                self.trade_prices.append(trade.price.numpy()[0])
+            self.logger["trades"].append(trades)
 
     def call(self, x):
         """
@@ -139,8 +140,12 @@ class Game(keras.Model):
         """
 
         if not self.train:
-            self.trade_num = 0
-            self.trade_prices = []
+            self.logger = {
+                "scenario": None,
+                "initial orders": [],
+                "trades": [],
+                "rewards": None,
+            }
 
         # Unpacking the input tensor
         self.data.assign(x[: 2 * self.end_time])
