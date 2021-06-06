@@ -102,11 +102,11 @@ def train(
             for i, scenario in enumerate(batch):
                 _rewards = game(scenario)
                 logger = game.logger
-                logger["rewards"] = _rewards
+                logger["rewards"] = _rewards.numpy()
                 logger["scenario"] = i
                 logger_batch.append(logger)
 
-        experiment.store_logger_batch(logger_batch, k)
+            experiment.store_logger_batch(logger_batch, k)
 
     if save:
         filename = f'saved_model_weights/weights_{datetime.now.strftime("%m%d%Y_%H%M%S")}.txt'

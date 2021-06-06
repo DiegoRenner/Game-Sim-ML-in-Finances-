@@ -12,6 +12,9 @@ class Order:
         self.agent_id = agent_id
         self.price = price
 
+    def numpy(self):
+        self.price = self.price.numpy()[0]
+
 
 class Trade:
     def __init__(self, agent_buy, agent_sell, quantity, price):

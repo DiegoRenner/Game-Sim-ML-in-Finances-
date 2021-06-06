@@ -1,3 +1,4 @@
+import numpy as np
 import tensorflow as tf
 import pickle
 from tensorboard.plugins.hparams import api as hp
@@ -10,18 +11,18 @@ def get_trade_averages(logger_batch):
         trades = [trade for l in logger["trades"] for trade in l]
         trade_numbers.append(len(trades))
         prices = [trade.price for trade in trades]
-        trade_prices.append(sum(prices) / len(prices))
+        trade_prices.append(np.mean(prices))
     avg_price = sum(trade_prices) / len(trade_prices)
-    return sum(trade_numbers) / len(trade_numbers), avg_price.numpy()[0]
+    return sum(trade_numbers) / len(trade_numbers), avg_price
 
 
 def get_average_rewards(logger_batch):
     for i, logger in enumerate(logger_batch):
         if i == 0:
-            avg_rewards = logger["rewards"]
+            rewards = logger["rewards"]
         else:
-            avg_rewards += logger["rewards"]
-    return avg_rewards
+            rewards += logger["rewards"]
+    return rewards / len(logger_batch)
 
 
 class Experiment:
@@ -39,11 +40,12 @@ class Experiment:
         self.epochs = 0
         self.saved_model_weights = None
 
+
         tb_dir = self.log_path + "tb/" + self.name
         self.writer = tf.summary.create_file_writer(tb_dir)
 
     def store_logger_batch(self, logger_batch: list, epoch: int):
-        self.logger_batches[f"Epoch {epoch}"]: logger_batch
+        self.logger_batches[f"Epoch {epoch}"] = logger_batch
         self.epochs += 1
         self.write_to_tensorboard(logger_batch, epoch)
 
@@ -63,5 +65,6 @@ class Experiment:
             hp.hparams(self.log_params)
 
     def save(self):
-        with open(self.log_path + "/" + self.name, 'wb') as f:
+        self.writer = None
+        with open(self.log_path + "/" + self.name + ".pkl", 'wb') as f:
             pickle.dump(self, f, pickle.HIGHEST_PROTOCOL)

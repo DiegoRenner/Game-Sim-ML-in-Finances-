@@ -99,7 +99,7 @@ class Game(keras.Model):
             orders.add(Order(agent_id=i, price=prices[i]))
 
         if not self.train:
-            self.logger["initial orders"].append(orders)
+            self.logger["initial orders"].append([order.numpy() for order in orders])
 
         trades = []
         while len(orders) > 1:
