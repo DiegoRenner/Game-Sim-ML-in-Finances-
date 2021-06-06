@@ -109,6 +109,8 @@ def train(
             experiment.store_logger_batch(logger_batch, k)
 
     if save:
-        filename = f'saved_model_weights/weights_{datetime.now.strftime("%m%d%Y_%H%M%S")}.txt'
+        filename = (
+            f'saved_model_weights/weights_{datetime.now.strftime("%m%d%Y_%H%M%S")}.txt'
+        )
         experiment.saved_model_weights = filename
         save_weights(game, filename)

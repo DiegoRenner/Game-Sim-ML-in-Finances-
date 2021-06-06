@@ -40,7 +40,6 @@ class Experiment:
         self.epochs = 0
         self.saved_model_weights = None
 
-
         tb_dir = self.log_path + "tb/" + self.name
         self.writer = tf.summary.create_file_writer(tb_dir)
 
@@ -57,8 +56,9 @@ class Experiment:
                 tf.summary.scalar("Average prices", avg_price, step=epoch)
             for agent in range(self.log_params["agent_num"]):
                 avg_rewards = get_average_rewards(logger_batch)
-                tf.summary.scalar(f"Average reward agent {agent}",
-                                  avg_rewards[agent], step=epoch)
+                tf.summary.scalar(
+                    f"Average reward agent {agent}", avg_rewards[agent], step=epoch
+                )
 
     def log_params_to_tensorboard(self):
         with self.writer.as_default():
@@ -66,5 +66,5 @@ class Experiment:
 
     def save(self):
         self.writer = None
-        with open(self.log_path + "/" + self.name + ".pkl", 'wb') as f:
+        with open(self.log_path + "/" + self.name + ".pkl", "wb") as f:
             pickle.dump(self, f, pickle.HIGHEST_PROTOCOL)
