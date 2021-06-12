@@ -12,6 +12,9 @@ class Order:
         self.agent_id = agent_id
         self.price = price
 
+    def numpy(self):
+        self.price = self.price.numpy()[0]
+
 
 class Trade:
     def __init__(self, agent_buy, agent_sell, quantity, price):
@@ -89,10 +92,10 @@ def get_sample(
     interest_rates = int_data[start : start + window_len]
     dividend_yields = dy_data[start : start + window_len]
 
-    random_factors = np.random.normal(size=window_len, scale=sigma)
-    det_factors = interest_rates - dividend_yields
+    f1 = np.random.normal(size=window_len, scale=sigma)
+    f2 = interest_rates - dividend_yields - 0.5 * (sigma ** 2)
 
-    prices = init_price * np.cumprod(1 + random_factors + det_factors)
+    prices = init_price * np.cumprod(np.exp(f1 + f2))
     dividends = prices * dividend_yields
 
     discount_factors = 1 / np.cumprod(1 + interest_rates[-horizon:])

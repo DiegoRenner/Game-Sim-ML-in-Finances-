@@ -3,21 +3,21 @@ from datetime import datetime
 from tqdm import trange
 import tensorflow as tf
 import tensorflow_probability as tfp
-from tensorboard.plugins.hparams import api as hp
 from utils import save_weights
 
 
 def train(
+    experiment,
     game,
     batch,
     epochs_total,
     population_size,
     max_iterations,
-    log_path,
     save,
-    log_params,
+    evaluate_every=1,
 ):
 
+    experiment.log_params_to_tensorboard()
     global iterations
 
     def objective_fn(w1, b1, w2, b2):
@@ -49,9 +49,6 @@ def train(
                 )
 
         return -cumulative_rewards  # minimize total negative rewards
-
-    log_dir = log_path + datetime.now().strftime("%Y%m%d-%H%M%S")
-    writer = tf.summary.create_file_writer(log_dir)
 
     # Train all agents
     print("---------------------------------------")
@@ -98,35 +95,22 @@ def train(
         )
 
         # Evaluation
-        game.train = False
-        trade_nums = []
-        avg_prices = []
-        for i, scenario in enumerate(batch):
-            if i == 0:
+        if evaluate_every % k == 0:
+            game.train = False
+            logger_batch = []
+
+            for i, scenario in enumerate(batch):
                 _rewards = game(scenario)
-                trade_nums.append(game.trade_num)
-                avg_prices.append(np.nanmean(game.trade_prices))
-            else:
-                _rewards += game(scenario)
-                trade_nums.append(game.trade_num)
-                avg_prices.append(np.nanmean(game.trade_prices))
+                logger = game.logger
+                logger["rewards"] = _rewards.numpy()
+                logger["scenario"] = i
+                logger_batch.append(logger)
 
-        _rewards = _rewards / len(batch)
-        avg_trade_num = np.nanmean(trade_nums)
-        avg_avg_price = np.nan_to_num(np.nanmean(avg_prices))
-
-        for agent in np.arange(game.agent_num):
-            with writer.as_default():
-                tf.summary.scalar(f"Average reward {agent}", _rewards[agent], step=k)
-        with writer.as_default():
-            tf.summary.scalar("Average number of trades", avg_trade_num, step=k)
-            tf.summary.scalar("Average price in trades", avg_avg_price, step=k)
-
-    with writer.as_default():
-        hp.hparams(log_params)
+            experiment.store_logger_batch(logger_batch, k)
 
     if save:
-        save_weights(
-            game,
-            f'saved_model_weights/weights_{datetime.now.strftime("%m%d%Y_%H%M%S")}.txt',
+        filename = (
+            f'saved_model_weights/weights_{datetime.now.strftime("%m%d%Y_%H%M%S")}.txt'
         )
+        experiment.saved_model_weights = filename
+        save_weights(game, filename)

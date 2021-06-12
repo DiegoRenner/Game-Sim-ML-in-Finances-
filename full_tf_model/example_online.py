@@ -1,6 +1,8 @@
+import pickle
 from env_total_v2 import Game
 from utils import get_data_online, batch_from_data
 from train import train
+from experiment import Experiment
 
 
 # Hyperparameters
@@ -10,11 +12,11 @@ game_params = {
 }
 
 training_params = {
-    "epochs_total": 2,  # number of times each agent is trained
-    "population_size": 5,  # number of different weights compared
-    "max_iterations": 5,  # number of iterations optimization algorithm runs
-    "log_path": "log/game/",
+    "epochs_total": 1,  # number of times each agent is trained
+    "population_size": 4,  # number of different weights compared
+    "max_iterations": 4,  # number of iterations optimization algorithm runs
     "save": False,
+    "evaluate_every": 1,
 }
 
 batch_params = {
@@ -29,8 +31,9 @@ batch_params = {
 seeds = [23462, 192, 3817, 9732, 4]
 
 log_params = {**game_params, **training_params, **batch_params}
-int_data, dy_data = get_data_online()
+experiment = Experiment("Example", log_params, "log/example/")
 
+int_data, dy_data = get_data_online()
 game = Game(**game_params)
 batch = batch_from_data(
     int_data, dy_data, game.agent_num, game.end_time, seeds, **batch_params
@@ -40,4 +43,9 @@ batch = batch_from_data(
 x = batch[0]
 _ = game(x)
 
-train(game, batch, **training_params, log_params=log_params)
+train(experiment, game, batch, **training_params)
+experiment.save()
+
+# load experiment
+# with open("log/example/Example.pkl", 'rb') as f:
+#     experiment = pickle.load(f)
