@@ -33,7 +33,25 @@ def create_random_series(ir_mean, div_mean, steps, ir_sigma=0, div_sigma=0):
     return interest_data, dividend_data
 
 
-def get_data():
+def save_data():
+    """get equal length dividend yield and interest rate time series for longest period possible
+    dividend yield comes from S&P 500; interest rate from Kenneth French's database"""
+
+    dy_monthly_data = quandl.get("MULTPL/SP500_DIV_YIELD_MONTH")["Value"]
+
+    # Resampling yearly dividend yield and cutting of 2021
+    dy_data = dy_monthly_data.resample("Y").apply(lambda x: gmean(x))[:-1]
+
+    datareader = pandas_datareader.famafrench.FamaFrenchReader(
+        "F-F_Research_Data_Factors", freq="Y", start=1926
+    )
+    int_data = datareader.read()[1]["RF"]  # 0 for monthly data; 1 for yearly data
+
+    min_len = min(len(dy_data), len(int_data))
+
+    pd.DataFrame([int_data[-min_len:].values / 100, dy_data[-min_len:].values / 100]).to_csv("data/hist_data.csv", index=False)
+
+def get_data_online():
     """get equal length dividend yield and interest rate time series for longest period possible
     dividend yield comes from S&P 500; interest rate from Kenneth French's database"""
 
@@ -51,6 +69,8 @@ def get_data():
 
     return (int_data[-min_len:].values / 100), dy_data[-min_len:].values / 100
 
+def get_data_offline():
+    return pd.read_csv("data/hist_data.csv").values
 
 def get_sample(
     int_data, dy_data, steps=11, horizon=20, init_price=100, sigma=0.2, seed=38279

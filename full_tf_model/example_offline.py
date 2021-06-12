@@ -1,5 +1,5 @@
 from env_total_v2 import Game
-from utils import get_data, batch_from_data
+from utils import get_data_offline, get_data_online, batch_from_data, save_data
 from train import train
 
 
@@ -29,7 +29,7 @@ batch_params = {
 seeds = [23462, 192, 3817, 9732, 4]
 
 log_params = {**game_params, **training_params, **batch_params}
-int_data, dy_data = get_data()
+int_data, dy_data = get_data_offline()
 
 game = Game(**game_params)
 batch = batch_from_data(

@@ -130,3 +130,6 @@ dmypy.json
 
 # ignore PyCharm settings files
 .idea/*
+log/*
+log/game/*
+log/game/*/*
