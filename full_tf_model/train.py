@@ -95,7 +95,7 @@ def train(
         )
 
         # Evaluation
-        if evaluate_every % k == 0:
+        if k % evaluate_every == 0:
             game.train = False
             logger_batch = []
 

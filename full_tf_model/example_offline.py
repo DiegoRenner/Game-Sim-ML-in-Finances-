@@ -12,7 +12,7 @@ game_params = {
 }
 
 training_params = {
-    "epochs_total": 1,  # number of times each agent is trained
+    "epochs_total": 2,  # number of times each agent is trained
     "population_size": 4,  # number of different weights compared
     "max_iterations": 4,  # number of iterations optimization algorithm runs
     "save": False,

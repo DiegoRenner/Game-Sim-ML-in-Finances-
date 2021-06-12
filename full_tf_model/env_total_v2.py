@@ -112,7 +112,7 @@ class Game(keras.Model):
             _seller_stocks = self.book[self.agent_num + ask.agent_id].numpy()
 
             if bid.price >= ask.price and cash_left >= ask.price and _seller_stocks > 1:
-                _quantity = min(np.floor(cash_left / ask.price), _seller_stocks)
+                _quantity = min(np.floor(cash_left / ask.price), _seller_stocks) if ask.price > 0 else _seller_stocks
                 _trade = Trade(bid.agent_id, ask.agent_id, _quantity, ask.price)
 
                 self._execute_trade(_trade)
