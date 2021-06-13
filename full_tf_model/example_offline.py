@@ -12,15 +12,15 @@ game_params = {
 }
 
 training_params = {
-    "epochs_total": 2,  # number of times each agent is trained
-    "population_size": 4,  # number of different weights compared
-    "max_iterations": 4,  # number of iterations optimization algorithm runs
+    "epochs_total": 10,  # number of times each agent is trained
+    "population_size": 10,  # number of different weights compared
+    "max_iterations": 10,  # number of iterations optimization algorithm runs
     "save": False,
     "evaluate_every": 1,
 }
 
 batch_params = {
-    "batch_size": 5,  # number of epochs an agent is trained per training
+    "batch_size": 10,  # number of epochs an agent is trained per training
     "endow_cash": 500,
     "endow_stock": 5,
     "horizon": 20,
@@ -28,7 +28,7 @@ batch_params = {
     "sigma": 0.2,
 }
 
-seeds = [23462, 192, 3817, 9732, 4]
+seeds = [23462, 192, 3817, 9732, 4, 55, 239, 11203, 2, 900]
 
 log_params = {**game_params, **training_params, **batch_params}
 experiment = Experiment("Example", log_params, "log/example/")

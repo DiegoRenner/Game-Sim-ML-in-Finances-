@@ -15,7 +15,7 @@ class Game(keras.Model):
         self.end_time = end_time
         self.agent_num = agent_num
         self.fc1_dims = fc1_dims
-        self.out_dims = 1
+        self.out_dims = end_time
         self.train = True
         self.logger = None
 
@@ -59,7 +59,7 @@ class Game(keras.Model):
                 tf.reshape(
                     self.out_layers[i](
                         tf.reshape(intermediate_outputs[i], shape=(1, self.fc1_dims))
-                    ),
+                    )[0][self.time],
                     shape=(1,),
                 )
             )
