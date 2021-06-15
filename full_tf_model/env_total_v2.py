@@ -29,7 +29,7 @@ class Game(keras.Model):
 
         # Initializing the layers corresponding to different agents
         self.first_layers = [
-            Dense(self.fc1_dims, activation="relu") for i in np.arange(self.agent_num)
+            Dense(self.fc1_dims, activation="tanh") for i in np.arange(self.agent_num)
         ]
         self.out_layers = [Dense(self.out_dims) for i in np.arange(self.agent_num)]
 

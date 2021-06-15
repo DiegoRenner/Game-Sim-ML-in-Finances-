@@ -28,7 +28,8 @@ batch_params = {
     "sigma": 0.2,
 }
 
-seeds = [23462, 192, 3817, 9732, 4, 55, 239, 11203, 2, 900]
+seeds = [23462, 192, 3817, 9732, 4, 55, 239, 11203, 2, 900,
+         9209 ,12399, 29, 192, 877, 20, 5001, 230, 100, 1492]
 
 log_params = {**game_params, **training_params, **batch_params}
 experiment = Experiment("Example", log_params, "log/example/")
