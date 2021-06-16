@@ -31,7 +31,7 @@ seeds_log = {
 seeds = np.random.randint(0,10000,batch_size).tolist()
 
 batch_params = {
-    "batch_size": 10,  # number of epochs an agent is trained per training
+    "batch_size": batch_size,  # number of epochs an agent is trained per training
     "endow_cash": 500,
     "endow_stock": 5,
     "horizon": 20,
