@@ -1,11 +1,12 @@
 import pickle
-
 import numpy as np
-
 from env_total_v2 import Game
 from utils import get_data_online, get_data_offline, batch_from_data
 from train import train
 from experiment import Experiment
+from datetime import datetime
+
+
 
 run_offline = True
 
@@ -41,7 +42,7 @@ batch_params = {
 
 
 log_params = {**game_params, **training_params, **batch_params, **seeds_log}
-experiment = Experiment("Example", log_params, "log/example/")
+experiment = Experiment("Example", log_params, "log/example_"+datetime.now().strftime("%m_%d_%Y-%H_%M_%S"))
 
 if run_offline:
     int_data, dy_data = get_data_offline()

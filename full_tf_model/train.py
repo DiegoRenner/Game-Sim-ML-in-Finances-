@@ -110,7 +110,7 @@ def train(
 
     if save:
         filename = (
-            f'saved_model_weights/weights_{datetime.now.strftime("%m%d%Y_%H%M%S")}.txt'
+            f'saved_model_weights/weights_{datetime.now().strftime("%m_%d_%Y-%H_%M_%S")}.txt'
         )
         experiment.saved_model_weights = filename
         save_weights(game, filename)
