@@ -12,7 +12,10 @@ def train(
     batch,
     epochs_total,
     population_size,
+    population_stddev,
     max_iterations,
+    differential_weight,
+    crossover_prob,
     save,
     evaluate_every=1,
 ):
@@ -82,7 +85,10 @@ def train(
             objective_fn,
             initial_position=initial_position,
             population_size=population_size,
+            population_stddev=population_stddev,
             max_iterations=max_iterations,
+            differential_weight=differential_weight,
+            crossover_prob=crossover_prob,
             seed=0,
         )
 
@@ -109,8 +115,6 @@ def train(
             experiment.store_logger_batch(logger_batch, k)
 
     if save:
-        filename = (
-            f'saved_model_weights/weights_{datetime.now().strftime("%m_%d_%Y-%H_%M_%S")}.txt'
-        )
+        filename = f'saved_model_weights/weights_{datetime.now().strftime("%m_%d_%Y-%H_%M_%S")}.txt'
         experiment.saved_model_weights = filename
         save_weights(game, filename)

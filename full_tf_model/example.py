@@ -7,7 +7,6 @@ from experiment import Experiment
 from datetime import datetime
 
 
-
 run_offline = True
 
 # Hyperparameters
@@ -19,17 +18,18 @@ game_params = {
 training_params = {
     "epochs_total": 10,  # number of times each agent is trained
     "population_size": 10,  # number of different weights compared
+    "population_stddev": 1.0,
     "max_iterations": 10,  # number of iterations optimization algorithm runs
+    "differential_weight": 0.5,
+    "crossover_prob": 0.9,
     "save": False,
     "evaluate_every": 1,
 }
 
 batch_size = 10
-seeds = np.random.randint(0,10000,batch_size)
-seeds_log = {
-    "seeds": np.array2string(seeds)
-}
-seeds = np.random.randint(0,10000,batch_size).tolist()
+seeds = np.random.randint(0, 10000, batch_size)
+seeds_log = {"seeds": np.array2string(seeds)}
+seeds = np.random.randint(0, 10000, batch_size).tolist()
 
 batch_params = {
     "batch_size": batch_size,  # number of epochs an agent is trained per training
@@ -37,12 +37,14 @@ batch_params = {
     "endow_stock": 5,
     "horizon": 20,
     "init_price": 100,
-    "sigma": 0.2
+    "sigma": 0.2,
 }
 
 
 log_params = {**game_params, **training_params, **batch_params, **seeds_log}
-experiment = Experiment("Example", log_params, "log/example_"+datetime.now().strftime("%m_%d_%Y-%H_%M_%S"))
+experiment = Experiment(
+    "Example", log_params, "log/example_" + datetime.now().strftime("%m_%d_%Y-%H_%M_%S")
+)
 
 if run_offline:
     int_data, dy_data = get_data_offline()
