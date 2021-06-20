@@ -8,7 +8,7 @@ from utils import Order, Trade
 
 
 class Game(keras.Model):
-    def __init__(self, end_time, agent_num, fc1_dims=128):
+    def __init__(self, end_time, agent_num, fc1_dims=128, init_bias=20.0):
         super(Game, self).__init__()
 
         self.time = 0
@@ -31,7 +31,11 @@ class Game(keras.Model):
         self.first_layers = [
             Dense(self.fc1_dims, activation="tanh") for i in np.arange(self.agent_num)
         ]
-        self.out_layers = [Dense(self.out_dims) for i in np.arange(self.agent_num)]
+        initializer = tf.keras.initializers.Constant(init_bias)
+        self.out_layers = [
+            Dense(self.out_dims, kernel_initializer=initializer)
+            for i in np.arange(self.agent_num)
+        ]
 
     def get_returns(self, input):
         """
@@ -112,7 +116,11 @@ class Game(keras.Model):
             _seller_stocks = self.book[self.agent_num + ask.agent_id].numpy()
 
             if bid.price >= ask.price and cash_left >= ask.price and _seller_stocks > 1:
-                _quantity = min(np.floor(cash_left / ask.price), _seller_stocks) if ask.price > 0 else _seller_stocks
+                _quantity = (
+                    min(np.floor(cash_left / ask.price), _seller_stocks)
+                    if ask.price > 0
+                    else _seller_stocks
+                )
                 _trade = Trade(bid.agent_id, ask.agent_id, _quantity, ask.price)
 
                 self._execute_trade(_trade)
