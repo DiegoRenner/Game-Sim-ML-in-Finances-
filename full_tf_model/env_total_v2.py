@@ -33,7 +33,7 @@ class Game(keras.Model):
         ]
         initializer = tf.keras.initializers.Constant(init_bias)
         self.out_layers = [
-            Dense(self.out_dims, kernel_initializer=initializer)
+            Dense(self.out_dims, bias_initializer=initializer)
             for i in np.arange(self.agent_num)
         ]
 

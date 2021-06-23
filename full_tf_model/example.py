@@ -13,6 +13,8 @@ run_offline = True
 game_params = {
     "end_time": 11,  # number of steps in each game
     "agent_num": 2,
+    "fc1_dims": 128,
+    "init_bias": 20,
 }
 
 training_params = {
