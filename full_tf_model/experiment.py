@@ -66,5 +66,6 @@ class Experiment:
 
     def save(self):
         self.writer = None
-        with open(self.log_path + "/" + self.name + ".pkl", "wb") as f:
+        #with open(self.log_path + "/" + self.name + ".pkl", "wb") as f:
+        with open("log/" + self.name + ".pkl", "wb") as f:
             pickle.dump(self, f, pickle.HIGHEST_PROTOCOL)

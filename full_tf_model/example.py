@@ -18,10 +18,10 @@ game_params = {
 }
 
 training_params = {
-    "epochs_total": 10,  # number of times each agent is trained
-    "population_size": 10,  # number of different weights compared
+    "epochs_total": 2,  # number of times each agent is trained
+    "population_size": 5,  # number of different weights compared
     "population_stddev": 1.0,
-    "max_iterations": 10,  # number of iterations optimization algorithm runs
+    "max_iterations": 2,  # number of iterations optimization algorithm runs
     "differential_weight": 0.5,
     "crossover_prob": 0.9,
     "save": False,
@@ -44,8 +44,9 @@ batch_params = {
 
 
 log_params = {**game_params, **training_params, **batch_params, **seeds_log}
+experiment_handle = datetime.now().strftime("%m_%d_%Y-%H_%M_%S")
 experiment = Experiment(
-    "Example", log_params, "log/example_" + datetime.now().strftime("%m_%d_%Y-%H_%M_%S")
+    "Example_" + experiment_handle, log_params, "log/example_" + experiment_handle
 )
 
 if run_offline:
