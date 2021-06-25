@@ -3,6 +3,7 @@
 
 ## Introduction
 ### The game in the field of RL
+[TO DO]
 ### Code structure
 
 The code is mainly seperated into three parts: The game environment, the inupt data generation, and the training loop.
@@ -24,7 +25,9 @@ The final reward is payed out as all the cash an agent holds plus all of their s
 
 ## Training
 ### Data generation
+[TO DO]
 ### Optimizer
+[TO DO]
 
 ## Results
 To keep things simple we started out only training a scenario with two agents in order to see in convergence was even possible for the simplest case.
