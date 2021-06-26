@@ -64,6 +64,8 @@ As opposed to more commonly applied gradient based optimization,
 DE does not rely on differentiability of the objective function.
 Instead, parameters get updated via the following algorithm:
 ![](https://media.springernature.com/lw785/springer-static/image/chp%3A10.1007%2F978-981-10-3770-2_56/MediaObjects/417792_1_En_56_Figa_HTML.gif)
+source:  Shukla, Richa, et al. "Variant of differential evolution algorithm." Advances in computer and computational sciences. Springer, Singapore, 2017. 601-608.
+
 
 - Parameter choices and initialization seem to be crucial to the result of the algorithm.
 
