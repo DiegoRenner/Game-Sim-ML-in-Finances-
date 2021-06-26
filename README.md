@@ -2,8 +2,30 @@
 
 
 ## Introduction
-### The game in the field of RL
-[TO DO]
+### The game
+In this project, we try to understand how agents 
+interact with each other in a financial market,
+that consists of one bond and one stock.
+Each period, the assets pay interest / dividend and agents
+specify "indifference prices" at which they would be willing to
+buy and sell the stock. Based on these "bids", trade is facilitated.
+Agents get rewarded for their final wealth.
+
+### Application of RL
+We use reinforcement learning (RL) to train the agents in this game.
+
+As discussed in the lecture, one main approach 
+to RL is to learn value functions 
+to evaluate possible actions depending on the state of the environment.
+
+Alternatively, we can try to learn policies directly
+without assigning values to actions.
+This is the approach we take here.
+Policies are parametrized by a neural network, whose weights
+get optimized using a gradient-free optimization algorithm.
+
+![](rl_overview.PNG)
+source: https://www.microsoft.com/en-us/research/wp-content/uploads/2017/03/Schulman.pdf
 ### Code structure
 
 The code is mainly seperated into three parts: The game environment, the inupt data generation, and the training loop.
@@ -24,10 +46,26 @@ The trading algorithm iterates over each agent in a random order. In each iterat
 The final reward is payed out as all the cash an agent holds plus all of their stock exchanged for cash at the horizon price computed in the input data generation.
 
 ## Training
-### Data generation
-[TO DO]
-### Optimizer
-[TO DO]
+- Each agent's objective is to maximize its average reward
+over multiple game scenarios that constitute the training batch.
+Each game scenario includes interest rate and dividend data.
+
+- To resemble realistic dividends and interest rates,
+data is generated from the annual dividend yield of the S&P 500
+and the corresponding risk-free rate in the year.
+The dividend yield of 20 years following the sampled time period
+is used to estimate the horizon price.
+
+- Both agents get trained in alternation.
+
+#### Differential Evolution
+- The policy weights of the agents are updated via [differential evolution (DE)](https://www.tensorflow.org/probability/api_docs/python/tfp/optimizer/differential_evolution_minimize).
+As opposed to more commonly applied gradient based optimization,
+DE does not rely on differentiability of the objective function.
+Instead, parameters get updated via the following algorithm:
+![](https://media.springernature.com/lw785/springer-static/image/chp%3A10.1007%2F978-981-10-3770-2_56/MediaObjects/417792_1_En_56_Figa_HTML.gif)
+
+- Parameter choices and initialization seem to be crucial to the result of the algorithm.
 
 ## Results
 To keep things simple we started out only training a scenario with two agents in order to see in convergence was even possible for the simplest case.
