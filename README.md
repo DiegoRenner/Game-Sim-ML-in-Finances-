@@ -40,7 +40,7 @@ The code is mainly seperated into three parts: The game environment, the inupt d
 The game contains parameters on how many timesteps to trade for, the number of agents trading, a NN that determines the prices these agents trade at and a trading algorithm that executes the trading at each timestep which are looped over within the game as well.
 
 ### Trading algorithm
-The trading algorithm iterates over each agent in a random order. In each iteration it then takes the agent (agent 1) besides the randomly chosen one (agent 0) that offers the lowest price for their stock. If the ask price from agent 1 is lower than the bid price from agent 0, agent 0 then buys as much of the stock from agent 1 as his cash allows. Agent 0 is now removed from the pool of agents and the next iteration begins by choosing the next agent at random.
+The trading algorithm iterates over each agent in a random order. In each iteration it then takes the agent (agent 1) besides the randomly chosen one (agent 0) that offers the lowest price for their stock. If the ask price from agent 1 is lower than the bid price from agent 0, agent 0 then buys as much of the stock from agent 1 as their cash allows. Agent 0 is now removed from the pool of agents and the next iteration begins by choosing the next agent at random. The prices each agent sets for their stock are recomputed after every trade using the NN.
 
 ### Paying out the final reward
 The final reward is payed out as all the cash an agent holds plus all of their stock exchanged for cash at the horizon price computed in the input data generation.
@@ -70,7 +70,7 @@ source:  Shukla, Richa, et al. "Variant of differential evolution algorithm." Ad
 - Parameter choices and initialization seem to be crucial to the result of the algorithm.
 
 ## Results
-To keep things simple we started out only training a scenario with two agents in order to see in convergence was even possible for the simplest case.
+To keep things simple we started out only training a scenario with two agents in order to see if convergence was even possible for the simplest case.
 We could see that starting our training with the parameters defined in example.py the average prices for which the stocks were trading would converge somewhere around 175.
 
 In this example we can see that starting to train with prices above 200 would have them fall steadily:
@@ -84,3 +84,14 @@ Setting the prices at 175 in the beginning would let us see that they would stay
 https://tensorboard.dev/experiment/Ln4K7bKCRkKrbxzo9bzOjA/#scalars
 
 We could however also see in this previous example that this seems to be a local minimum where one of the agents gets the upper hand, always increasing it's reward when it's turn to optimize comes around. The other agent however doesn't manage to gain back all of the advantage in it's own turn.
+
+
+## Future Work
+We could see in the previous section that some kind of convergence is definitely possible but this wasn't really the convergence we were looking for, and also it was only tested in the simplest two agent scenario.
+
+### Finding a stable optimum for two agents
+First we would suggest continuing to stick to the two agent scenario and trying to find an optimum where both agents have maximized their rewards in a simillar manner.
+There are many paths to persue in order to possibly reach this goal but in order to get our first bearings it would probably be useful to do some ensemble training. In the ensemble training we would do small runs while testing several combinations of training parameters such as epochs trained for, population size, population deviation and others. If all else fails it is of course also possible to experiment with the NN architecture, which at the moment only has one dense hidden layer.
+
+### Generalizing to more agents
+If there is a set of parameters found that leads to finding a stable optimum with two agents the next step would be to take these parameters and see if they can be generalized to more agent scenarios. If that doesn't work of course one could also do ensemble training here and see what the differences to doing this in the previous setting would be. Questions like: "Do we need to scale the population size with which we train according to the number of agents?" could be interesting.
