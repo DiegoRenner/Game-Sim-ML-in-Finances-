@@ -85,6 +85,18 @@ https://tensorboard.dev/experiment/Ln4K7bKCRkKrbxzo9bzOjA/#scalars
 
 We could however also see in this previous example that this seems to be a local minimum where one of the agents gets the upper hand, always increasing it's reward when it's turn to optimize comes around. The other agent however doesn't manage to gain back all of the advantage in it's own turn.
 
+## Issues with current implementation
+There are many possible reasons why we do not see the results that we may we have hoped for.
+- Issues related to the game
+  - Agents are required to engage in trading, potentially giving up all their stock holdings
+- Issues related to the model of the agent's
+  - Choice of shallow NN, where input is only the last return
+  - Better: 
+    - incorporate time dimension (e.g., output layer with different places for output in different periods)
+    - Give agents more information: current holdings
+- Issues related to parameter choices
+  - Optimizer highly sensitive to parameters and initialization. We possibly did not find a good set of parameters.
+  - Sequential nature of game makes training slow and exploration of hyperparameters difficult
 
 ## Future Work
 We could see in the previous section that some kind of convergence is definitely possible but this wasn't really the convergence we were looking for, and also it was only tested in the simplest two agent scenario.
