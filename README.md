@@ -98,6 +98,8 @@ There are many possible reasons why we do not see the results that we may we hav
   - Optimizer highly sensitive to parameters and initialization. We possibly did not find a good set of parameters.
   - Sequential nature of game makes training slow and exploration of hyperparameters difficult
 
+- Possible also issues related to the optimization itself (suited for this task?)
+
 ## Future Work
 We could see in the previous section that some kind of convergence is definitely possible but this wasn't really the convergence we were looking for, and also it was only tested in the simplest two agent scenario.
 
