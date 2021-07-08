@@ -103,8 +103,8 @@ There are many possible reasons why we do not see the results that we may we hav
 ## Future Work
 We could see in the previous section that some kind of convergence is definitely possible but this wasn't really the convergence we were looking for, and also it was only tested in the simplest two agent scenario.
 
-### Finding a stable optimum for two agents
-First we would suggest continuing to stick to the two agent scenario and trying to find an optimum where both agents have maximized their rewards in a simillar manner.
+### Finding a stable equilibrium for two agents
+First we would suggest continuing to stick to the two agent scenario and trying to find an equilibrium where both agents have maximized their rewards in a simillar manner.
 There are many paths to persue in order to possibly reach this goal but in order to get our first bearings it would probably be useful to do some ensemble training. In the ensemble training we would do small runs while testing several combinations of training parameters such as epochs trained for, population size, population deviation and others. If all else fails it is of course also possible to experiment with the NN architecture, which at the moment only has one dense hidden layer.
 
 ### Generalizing to more agents
